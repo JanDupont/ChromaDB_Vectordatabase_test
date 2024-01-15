@@ -1,0 +1,19 @@
+{
+  "name": "chromadb_vector_shit",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@xenova/transformers": "^2.14.0",
+    "chromadb": "^1.7.3",
+    "install": "^0.13.0",
+    "npm": "^10.3.0",
+    "openai": "^4.24.7"
+  }
+}
