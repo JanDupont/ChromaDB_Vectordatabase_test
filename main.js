@@ -4,8 +4,9 @@ import { pipeline } from "@xenova/transformers";
 import dotenv from "dotenv";
 dotenv.config();
 
-const activePreset = 1;
-const query = "Schwertkämpfer";
+const activePreset = 0;
+const query = "Rettungswagen Fahrzeug";
+const queryLang = "en"; // language code or empty string
 const presets = [
 	{ name: "my_collection", model: "Xenova/all-MiniLM-L6-v2" },
 	// { name: "my_collection_2", model: "Xenova/all-mpnet-base-v2" }, // not working currently, empty arrays
@@ -23,12 +24,15 @@ function getSymbols() {
 	const json = JSON.parse(jsonString);
 	Object.values(json.nodes).forEach((node) => {
 		if (node.layer === "descriptor" && node.type === "symbol") {
-			let term = JSON.parse(JSON.stringify(node.terminology["en"]?.term?.value));
-			if (term) {
-				ids.push(node.id);
-				terms.push(node.terminology["en"]?.term?.value);
-				metadatas.push({ source: "SPELL" });
-			}
+			let symbol = JSON.parse(JSON.stringify(node));
+			Object.entries(symbol.terminology).forEach(([key, value]) => {
+				let lang = key;
+				if (value.term?.value) {
+					ids.push(symbol.id + "_" + lang);
+					terms.push(value.term?.value);
+					metadatas.push({ source: "SPELL", lang: lang });
+				}
+			});
 		}
 	});
 }
@@ -57,11 +61,21 @@ async function runChromaDB() {
 		});
 	}
 	async function fillCollection() {
-		await collection.add({
-			ids: ids,
-			metadatas: metadatas,
-			documents: terms,
-		});
+		// doing this in 10 iterations to avoid memory issues
+		let step = ids.length / 10;
+		let start = 0;
+		let end = step;
+		for (let i = 0; i < 10; i++) {
+			console.log("FILL COLLECTION", i);
+			await collection.add({
+				ids: ids.slice(start, end),
+				metadatas: metadatas.slice(start, end),
+				documents: terms.slice(start, end),
+			});
+			start = end;
+			end += step;
+		}
+		console.log("DONE FILLING COLLECTION");
 	}
 	async function getCollection() {
 		console.log("GET");
@@ -82,6 +96,8 @@ async function runChromaDB() {
 	const results = await collection.query({
 		nResults: 20,
 		queryTexts: [query],
+		// if lang is set, only allow results with that lang:  where: { metadata: { lang: queryLang } },
+		...(queryLang ? { where: { lang: { $eq: queryLang } } } : {}),
 	});
 	console.log(results);
 }
