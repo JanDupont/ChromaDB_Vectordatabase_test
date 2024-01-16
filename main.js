@@ -20,7 +20,7 @@ let ids = [];
 let terms = [];
 let metadatas = [];
 function getSymbols() {
-	const jsonString = fs.readFileSync("SPELL.json");
+	const jsonString = fs.readFileSync("SPELL.json").toString();
 	const json = JSON.parse(jsonString);
 	Object.values(json.nodes).forEach((node) => {
 		if (node.layer === "descriptor" && node.type === "symbol") {
