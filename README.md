@@ -11,4 +11,4 @@ node main.js
 -   bessere, kostenlose models finden
 -   "update symbol" logik ausprobieren
 -   descriptions mit einbeziehen für mehr context (slow af momentan, kurz getestet)
--   typescript
+-   persistieren der datenbank ohne docker

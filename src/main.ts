@@ -5,31 +5,31 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const activePreset = 0;
-const query = "Rettungswagen Fahrzeug";
-const queryLang = "en"; // language code or empty string
+const query = "Rettungswagen";
+const queryLang = "de"; // language code or empty string
 const presets = [
-	{ name: "my_collection", model: "Xenova/all-MiniLM-L6-v2" },
-	// { name: "my_collection_2", model: "Xenova/all-mpnet-base-v2" }, // not working currently, empty arrays
-	{ name: "my_collection_3", model: "Xenova/all-MiniLM-L12-v2" },
+	{ name: "my_collection", model: "Xenova/all-MiniLM-L6-v2" }, // sentence-transformer
+	// { name: "my_collection_2", model: "Xenova/all-mpnet-base-v2" }, // no sentence-transformer, not working currently, empty arrays
+	{ name: "my_collection_3", model: "Xenova/all-MiniLM-L12-v2" }, // sentence-transformer
 ];
 
 // Create a feature-extraction pipeline
 const extractor = await pipeline("feature-extraction", presets[activePreset].model);
 
-let ids = [];
-let terms = [];
-let metadatas = [];
+let ids: string[] = [];
+let terms: string[] = [];
+let metadatas: { source: string; lang: string }[] = [];
 function getSymbols() {
 	const jsonString = fs.readFileSync("SPELL.json").toString();
 	const json = JSON.parse(jsonString);
-	Object.values(json.nodes).forEach((node) => {
+	Object.values(json.nodes).forEach((node: any) => {
 		if (node.layer === "descriptor" && node.type === "symbol") {
-			let symbol = JSON.parse(JSON.stringify(node));
+			let symbol: any = JSON.parse(JSON.stringify(node));
 			Object.entries(symbol.terminology).forEach(([key, value]) => {
 				let lang = key;
-				if (value.term?.value) {
+				if ((value as any).term?.value) {
 					ids.push(symbol.id + "_" + lang);
-					terms.push(value.term?.value);
+					terms.push((value as any).term?.value);
 					metadatas.push({ source: "SPELL", lang: lang });
 				}
 			});
@@ -38,15 +38,15 @@ function getSymbols() {
 }
 
 async function runChromaDB() {
-	let client = new chromadb.ChromaClient("localhost", 8000);
-	let collection;
+	let client = new chromadb.ChromaClient({ path: "http://localhost:8000" });
+	let collection: chromadb.Collection;
 
 	// OpenAI free????? embedding function (ada-002) (pricing gelistet aber nichts sichtbar in usage dashboard)
 	// const embedder = new chromadb.OpenAIEmbeddingFunction({
 	// 	openai_api_key: "process.env.OPENAI_KEY",
 	// });
 	class MyEmbeddingFunction {
-		async generate(texts) {
+		async generate(texts: string[]) {
 			const output = await extractor(texts, { pooling: "mean", normalize: true });
 			return output.tolist();
 		}
@@ -93,6 +93,7 @@ async function runChromaDB() {
 		await getCollection();
 	}
 
+	// @ts-ignore
 	const results = await collection.query({
 		nResults: 20,
 		queryTexts: [query],
