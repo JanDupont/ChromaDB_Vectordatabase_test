@@ -1,6 +1,6 @@
 import { type Collection, ChromaClient } from "chromadb";
 import { MyEmbeddingFunction } from "./embeddingFunction.js";
-import { symbols } from "./symbols.js";
+import { symbols, getSymbolMetadata } from "./symbols.js";
 
 const collectionName = "SPELL";
 
@@ -30,18 +30,23 @@ async function createCollection() {
 		embeddingFunction: embedder,
 	});
 }
+// TODO: rework this to "upsertSymbols" to make this more generic, then use for init and adding new symbols
 async function initSymbolEmbeddings() {
 	console.log("[COLLECTION]: INIT SYMBOL EMBEDDINGS");
 	let ids: string[] = [];
 	let terms: string[] = [];
 	let metadatas: { source: string; lang: string }[] = [];
 	symbols.forEach((symbol: any) => {
+		let symbolMetadata = getSymbolMetadata(symbol.id);
 		Object.entries(symbol.terminology).forEach(([key, value]) => {
 			let lang = key;
 			if ((value as any).term?.value) {
 				ids.push(symbol.id + "_" + lang);
 				terms.push((value as any).term?.value);
-				metadatas.push({ source: "SPELL", lang: lang });
+				metadatas.push({
+					...symbolMetadata,
+					lang: lang,
+				});
 			}
 		});
 	});
@@ -77,6 +82,33 @@ export async function queryCollection(query: string, nResults = 20, lang = "") {
 	const results = await collection.query({
 		nResults: nResults,
 		queryTexts: query,
+		// if lang is set, only allow results with that lang:  where: { metadata: { lang: queryLang } },
+		...(lang ? { where: { lang: { $eq: lang } } } : {}),
+	});
+	return results;
+}
+
+async function getCombinedEmbedding(positive: string[], negative: string[]) {
+	const positiveEmbeddings: number[][] = await embedder.generate(positive);
+	const negativeEmbeddings: number[][] = await embedder.generate(negative);
+
+	// Approach 1
+	const combinedEmbedding = positiveEmbeddings.map((positiveEmbedding, i) => {
+		return positiveEmbedding.map((value, j) => value - negativeEmbeddings[i][j]);
+	});
+	// Approach 2
+	// const combinedEmbedding = positiveEmbeddings.map((positiveEmbedding, i) => {
+	// 	return positiveEmbedding.map((value, j) => value * (1 - negativeEmbeddings[i][j]));
+	// });
+
+	return combinedEmbedding;
+}
+export async function queryCollectionCombined(positive: string[], negative: string[], nResults = 20, lang = "") {
+	console.log("[COLLECTION]: QUERY COMBINED", positive, negative, nResults, lang);
+	const combinedEmbedding = await getCombinedEmbedding(positive, negative);
+	const results = await collection.query({
+		nResults: nResults,
+		queryEmbeddings: combinedEmbedding,
 		// if lang is set, only allow results with that lang:  where: { metadata: { lang: queryLang } },
 		...(lang ? { where: { lang: { $eq: lang } } } : {}),
 	});

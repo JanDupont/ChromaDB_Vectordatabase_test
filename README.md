@@ -13,8 +13,10 @@ node main.js
 
 # TODO
 
--   bessere, kostenlose models finden
--   "update symbol" logik ausprobieren
--   descriptions mit einbeziehen für mehr context (slow af momentan, kurz getestet)
--   persistieren der datenbank ohne docker
--   Models werden aktuell von huggingface gefetched und in node_modules/@xenova/.cache gecached, evtl langfristig (wenn man den Service hier dockerized) sinnvoll, das Model schon in den container zu embedden (mehr dazu: https://huggingface.co/docs/transformers.js/custom_usage)
+-   [ ] weitere/bessere, kostenlose models finden
+-   [ ] "update symbol" logik ausprobieren (upsert)
+-   [ ] descriptions mit einbeziehen für mehr context (slow af momentan, kurz getestet)
+-   [ ] persistieren der datenbank ohne docker (stand jetzt fertigen docker service nutzen)
+-   [ ] Models werden aktuell von huggingface gefetched und in node_modules/@xenova/.cache gecached, evtl langfristig (wenn man den Service hier dockerized) sinnvoll, das Model schon in den container zu embedden (mehr dazu: https://huggingface.co/docs/transformers.js/custom_usage)
+-   [x] combinedQueries mit positive and negative texten
+-   [x] referredBy typen in metadata wiederspiegeln (scopes) (um später spezifischere filter zu ermöglichen)
