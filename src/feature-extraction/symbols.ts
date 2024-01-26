@@ -30,7 +30,6 @@ export function getSymbolMetadata(symbolId: string) {
 	let symbol = graph.nodes[symbolId];
 	if (!symbol) return metadata;
 
-	// TODO: hier weitermachen: wieso werden keine scopes gesetzt?
 	let scopes: string[] = [];
 	symbol.referredBy.forEach((referredById: string) => {
 		let node = graph.nodes[referredById];

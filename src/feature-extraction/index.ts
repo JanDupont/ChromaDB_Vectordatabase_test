@@ -34,4 +34,16 @@ export function API(app: Express) {
 	// nResults: 10
 	// lang: ""
 	// http://localhost:4447/queryCombined?positive=["Herzstörung","Kreislauf"]&negative=["Herz"]&nResults=10&lang=
+
+	app.get("/queryIds", async (req, res) => {
+		const ids_string = req.query.ids as string;
+		// make ids to a real string array again
+		const ids = JSON.parse(ids_string);
+		const results = await collectionManager.queryCollectionByIds(ids);
+		console.log(results.documents);
+		res.send(results);
+	});
+	// example query url:
+	// ids: ["0a95e0cd-1ffc-4f0f-839d-e1f5ea227d28_en"]
+	// http://localhost:4447/queryIds?ids=[%220a95e0cd-1ffc-4f0f-839d-e1f5ea227d28_en%22]
 }
