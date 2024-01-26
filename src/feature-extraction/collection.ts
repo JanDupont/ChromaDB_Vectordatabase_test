@@ -93,9 +93,9 @@ export async function queryCollection(query: string, nResults = 20, lang = "") {
 	return results;
 }
 
-async function getCombinedEmbedding(positive: string[], negative: string[]) {
-	const positiveEmbeddings: number[][] = await embedder.generate(positive);
-	const negativeEmbeddings: number[][] = await embedder.generate(negative);
+async function getCombinedEmbedding(positive: string, negative: string) {
+	const positiveEmbeddings: number[][] = await embedder.generate([positive]);
+	const negativeEmbeddings: number[][] = await embedder.generate([negative]);
 
 	// Approach 1
 	const combinedEmbedding = positiveEmbeddings.map((positiveEmbedding, i) => {
@@ -108,14 +108,14 @@ async function getCombinedEmbedding(positive: string[], negative: string[]) {
 
 	return combinedEmbedding;
 }
-export async function queryCollectionCombined(positive: string[], negative: string[], nResults = 20, lang = "") {
-	console.log("[COLLECTION]: QUERY COMBINED", positive, negative, nResults, lang);
+export async function queryCollectionCombined(positive: string, negative: string, nResults = 20, langs: string[] = []) {
+	console.log("[COLLECTION]: QUERY COMBINED", positive, negative, nResults, langs);
 	const combinedEmbedding = await getCombinedEmbedding(positive, negative);
 	const results = await collection.query({
 		nResults: nResults,
 		queryEmbeddings: combinedEmbedding,
 		// if lang is set, only allow results with that lang:  where: { metadata: { lang: queryLang } },
-		...(lang ? { where: { lang: { $eq: lang } } } : {}),
+		...(langs.length ? { where: { lang: { $in: langs } } } : {}),
 	});
 	return results;
 }

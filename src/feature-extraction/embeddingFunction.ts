@@ -13,6 +13,7 @@ const extractor = await pipeline(task, model);
 
 export class MyEmbeddingFunction {
 	async generate(texts: string[]): Promise<number[][]> {
+		if (!Array.isArray(texts)) texts = [texts];
 		const output = await extractor(texts, { pooling: "mean", normalize: true });
 		return output.tolist();
 	}
