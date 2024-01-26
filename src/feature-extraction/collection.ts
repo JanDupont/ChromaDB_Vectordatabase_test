@@ -1,6 +1,7 @@
 import { type Collection, ChromaClient } from "chromadb";
 import { MyEmbeddingFunction } from "./embeddingFunction.js";
 import { symbols, getSymbolMetadata } from "./symbols.js";
+import { benchmarkGenerateEmbeddings, benchmarkAddToCollection } from "./benchmarks.js";
 
 const collectionName = "SPELL";
 
@@ -22,6 +23,9 @@ if (!allCollectionNames.find((item) => item.name === collectionName)) {
 } else {
 	await getCollection();
 }
+
+await benchmarkGenerateEmbeddings(embedder);
+await benchmarkAddToCollection(collection!);
 
 async function createCollection() {
 	console.log("[COLLECTION]: CREATE");
