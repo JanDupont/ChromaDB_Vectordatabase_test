@@ -3,7 +3,8 @@ import { MyEmbeddingFunction } from "./embeddingFunction.js";
 import { symbols, getSymbolMetadata } from "./symbols.js";
 import { benchmarkGenerateEmbeddings, benchmarkAddToCollection } from "./benchmarks.js";
 
-const collectionName = "SPELL";
+// SPELL, SPELL-SemanticSearch, SPELL-Multilingual
+export const collectionName = "SPELL-Multilingual";
 
 let client = new ChromaClient({ path: "http://localhost:8000" });
 
