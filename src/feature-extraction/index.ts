@@ -20,7 +20,7 @@ export function API(app: Express) {
 		const positive = (req.query.positive as string) || "";
 		const negative = (req.query.negative as string) || "";
 		const nResults = Number(req.query.nResults);
-		const langs = (JSON.parse(req.query.langs as string) as string[]) || [];
+		const langs = (JSON.parse((req.query.langs as string) || "[]") as string[]) || [];
 		const results = await collectionManager.queryCollectionCombined(positive, negative, nResults, langs);
 		//console.log(results.documents[0]);
 		for (let i = 0; i < results.documents.length; i++) {
@@ -29,10 +29,10 @@ export function API(app: Express) {
 		res.send(results);
 	});
 	// example query url:
-	// positive: ["Herzstörung", "Kreislauf"]
-	// negative: ["Herz"]
+	// positive: "outback,car,safari,for%20humans%20to%20drive"
+	// negative: "type"
 	// nResults: 10
-	// lang: ""
+	// lang: ["de","en"]
 	// http://localhost:4447/queryCombined?positive="outback,car,safari,for%20humans%20to%20drive"&negative="type"&nResults=10&langs=["de","en"]
 
 	app.get("/queryIds", async (req, res) => {
