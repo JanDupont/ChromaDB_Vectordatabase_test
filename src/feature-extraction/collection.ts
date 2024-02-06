@@ -120,14 +120,8 @@ export async function queryCollectionCombined(positive: string, negative: string
 	return results;
 }
 export async function queryCollectionByIds(ids: string[]) {
-	let languages = ["en", "de", "tr", "zh", "ru", "fr", "pl", "es"];
-	ids = ids.map((id) => {
-		let lang = id.split("_").pop();
-		if (lang && languages.includes(lang)) return id;
-		else return id + "_en";
-	});
 	const result = await collection.get({
-		ids: ids,
+		where: { symbolId: { $in: ids } },
 	});
 	return result;
 }
