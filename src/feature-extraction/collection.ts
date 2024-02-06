@@ -40,7 +40,7 @@ async function initSymbolEmbeddings() {
 	console.log("[COLLECTION]: INIT SYMBOL EMBEDDINGS");
 	let ids: string[] = [];
 	let terms: string[] = [];
-	let metadatas: { source: string; lang: string }[] = [];
+	let metadatas: { source: string; lang: string; symbolId: string }[] = [];
 	symbols.forEach((symbol: any) => {
 		let symbolMetadata = getSymbolMetadata(symbol.id);
 		Object.entries(symbol.terminology).forEach(([key, value]) => {

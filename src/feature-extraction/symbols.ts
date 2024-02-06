@@ -23,8 +23,10 @@ export function getSymbols() {
 }
 
 export function getSymbolMetadata(symbolId: string) {
-	let metadata: any = {
+	let metadata: { source: string; scopes: string; symbolId: string } = {
 		source: "SPELL",
+		scopes: "",
+		symbolId: symbolId,
 	};
 
 	let symbol = graph.nodes[symbolId];
@@ -38,6 +40,6 @@ export function getSymbolMetadata(symbolId: string) {
 		if (!scopes.includes(scope)) scopes.push(scope);
 	});
 	// put the array as a string into scopes (comma seperated)
-	metadata["scopes"] = scopes.toString()
+	metadata["scopes"] = scopes.toString();
 	return metadata;
 }

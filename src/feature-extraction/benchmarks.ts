@@ -53,7 +53,7 @@ export async function benchmarkAddToCollection(collection: Collection) {
 	// dummy because the first one usually takes longer, don't want to measure that
 	await collection.add({
 		ids: ["dummy"],
-		metadatas: [{ term: "dummy", description: "dummy" }],
+		metadatas: [{ term: "dummy", description: "dummy", symbolId: "dummy" }],
 		documents: ["dummy"],
 	});
 	await collection.delete({
@@ -64,7 +64,7 @@ export async function benchmarkAddToCollection(collection: Collection) {
 		let now = Date.now();
 		await collection.add({
 			ids: ["noDescription"],
-			metadatas: [{ term: noDescription, description: "" }],
+			metadatas: [{ term: noDescription, description: "", symbolId: "noDescription" }],
 			documents: [noDescription],
 		});
 		timesNoDescription.push(Date.now() - now);
@@ -76,7 +76,11 @@ export async function benchmarkAddToCollection(collection: Collection) {
 		await collection.add({
 			ids: ["withDescription"],
 			metadatas: [
-				{ term: withDescription.split("|")[0].trim(), description: withDescription.split("|")[1].trim() },
+				{
+					term: withDescription.split("|")[0].trim(),
+					description: withDescription.split("|")[1].trim(),
+					symbolId: "withDescription",
+				},
 			],
 			documents: [withDescription],
 		});
@@ -92,6 +96,7 @@ export async function benchmarkAddToCollection(collection: Collection) {
 				{
 					term: withLongDescription.split("|")[0].trim(),
 					description: withLongDescription.split("|")[1].trim(),
+					symbolId: "withLongDescription",
 				},
 			],
 			documents: [withLongDescription],
